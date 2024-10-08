@@ -1,7 +1,7 @@
 import { Button, Tabs, TabsProps } from "antd";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import ConfirmReservation from "./ConfirmReservation";
+// import ConfirmReservation from "./ConfirmReservation";
 import ListAllReservation from "./ListAllReservation";
 import CreateNewUser from "./CreateNewUser";
 import { useEffect } from "react";
@@ -18,18 +18,18 @@ const AdminModule = () => {
   }, [usuario, navigate, cargando]);
 
   const items: TabsProps["items"] = [
+    // {
+    //   key: "1",
+    //   label: "Confirmar Reserva",
+    //   children: <ConfirmReservation />,
+    // },
     {
       key: "1",
-      label: "Confirmar Reserva",
-      children: <ConfirmReservation />,
-    },
-    {
-      key: "2",
       label: "Ver Reservas",
       children: <ListAllReservation />,
     },
     {
-      key: "3",
+      key: "2",
       label: "Crear Nuevo Usuario",
       children: <CreateNewUser />,
     },
@@ -45,6 +45,9 @@ const AdminModule = () => {
       <h1 className="text-2xl font-bold text-center my-4 uppercase">
         Sistema De Reservas
       </h1>
+      <div className="flex justify-center mb-3">
+        <img src="/images/colombofrances_logo.jpeg" alt="" className="w-60" />
+      </div>
       <div>
         <Tabs defaultActiveKey="1" type="card" size="large" items={items} />
       </div>

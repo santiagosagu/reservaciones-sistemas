@@ -29,10 +29,14 @@ const Autentication: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center h-screen">
-      <form className="flex flex-col items-center justify-center p-4 rounded-md gap-6 min-w-[300px] min-h-[300px] shadow-custom">
+      <form className="flex flex-col items-center justify-center p-4 rounded-md gap-6 min-w-[300px] min-h-[300px] shadow-custom bg-white">
+        <div className="flex justify-center mb-3">
+          <img src="/images/colombofrances_logo.jpeg" alt="" className="w-40" />
+        </div>
         <h1 className="text-2xl font-bold text-center mb-4 uppercase">
           Sistema De Reservas
         </h1>
+
         <Input
           placeholder="Email"
           value={email}

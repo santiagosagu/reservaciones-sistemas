@@ -42,6 +42,9 @@ const UserReservation = () => {
       <h1 className="text-2xl font-bold text-center my-4 uppercase">
         Sistema De Reservas
       </h1>
+      <div className="flex justify-center mb-3">
+        <img src="/images/colombofrances_logo.jpeg" alt="" className="w-60" />
+      </div>
       <div>
         <Tabs defaultActiveKey="1" type="card" size="large" items={items} />
       </div>

@@ -1,7 +1,7 @@
-import { Collapse, Tag } from "antd";
+import { Tag } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import { IReserva } from "../../interfaces/IReservas";
-import GenerateQR from "../../components/GenerateQR";
+// import GenerateQR from "../../components/GenerateQR";
 
 const CheckoutReservation = () => {
   const { isLoading, isError, reservas } = useReservas();
@@ -14,7 +14,7 @@ const CheckoutReservation = () => {
       <div className="w-full lg:w-[800px]">
         {reservas?.map((reserva: IReserva) => (
           <div
-            className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl"
+            className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl bg-white"
             key={reserva.id}
           >
             <Tag
@@ -42,7 +42,7 @@ const CheckoutReservation = () => {
               -
               <p className="text-gray-500 capitalize ml-1">{reserva.horaFin}</p>
             </div>
-            {reserva.estado === "pendiente" && (
+            {/* {reserva.estado === "pendiente" && (
               <Collapse
                 items={[
                   {
@@ -52,7 +52,7 @@ const CheckoutReservation = () => {
                   },
                 ]}
               />
-            )}
+            )} */}
           </div>
         ))}
       </div>

@@ -1,22 +1,60 @@
-import { Tag } from "antd";
+import { Modal, Tag } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import { IReserva } from "../../interfaces/IReservas";
+import { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 
 const ListAllReservation = () => {
-  const { isLoading, isError, data } = useReservas();
+  const [id, setId] = useState("");
+  const [reservas, setReservas] = useState<IReserva[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { isLoading, isError, todasLasReservas, confirmarReserva } =
+    useReservas();
+
+  useEffect(() => {
+    if (todasLasReservas) {
+      setReservas(todasLasReservas);
+    }
+  }, [todasLasReservas]);
 
   if (isLoading) return <div>Cargando...</div>;
   if (isError) return <div>Error al cargar las reservas</div>;
 
+  const handleClick = (id: string, estado: string) => {
+    if (estado === "pendiente") {
+      setId(id);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleOk = () => {
+    confirmarReserva(id);
+    setIsModalOpen(false);
+    setId("");
+    toast.success("Reserva confirmada con éxito");
+    queryClient.invalidateQueries({ queryKey: ["todasLasReservas"] });
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setId("");
+  };
+
   return (
     <div className="flex justify-center gap-2 p-4 w-full">
+      <ToastContainer />
       <div className="w-full lg:w-[800px]">
-        {data.todasLasReservas.data?.map((reserva: IReserva) => (
+        {reservas?.map((reserva: IReserva) => (
           <div
-            className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl"
+            className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl bg-white"
             key={reserva.id}
           >
             <Tag
+              className="cursor-pointer"
               bordered={false}
               color={
                 reserva.estado === "pendiente"
@@ -25,6 +63,7 @@ const ListAllReservation = () => {
                   ? "success"
                   : "error"
               }
+              onClick={() => handleClick(reserva.id, reserva?.estado || "")}
             >
               <p className="text-xl capitalize font-semibold">
                 {reserva.estado}
@@ -50,7 +89,14 @@ const ListAllReservation = () => {
           </div>
         ))}
       </div>
-      <div></div>
+      <Modal
+        title="Confirmar Reserva?"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <h2>Estas seguro de confirmar esta reserva?</h2>
+      </Modal>
     </div>
   );
 };

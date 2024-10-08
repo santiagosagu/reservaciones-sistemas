@@ -10,20 +10,21 @@ import {
   query,
   updateDoc,
   onSnapshot,
-  DocumentData,
-  Query,
+  orderBy,
+  // DocumentData,
+  // Query,
 } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import { IReserva } from "../interfaces/IReservas";
 import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
-import useRealtimeQueries from "./useRealTimeQueries";
+// import useRealtimeQueries from "./useRealTimeQueries";
 
-interface CollectionConfig {
-  name: string;
-  query: (userId: string | null) => Query<DocumentData>;
-  transform: (doc: DocumentData) => any;
-}
+// interface CollectionConfig {
+//   name: string;
+//   query: (userId: string | null) => Query<DocumentData>;
+//   transform: (doc: DocumentData) => any;
+// }
 
 export function useReservas(idConfirmReserva?: string) {
   const queryClient = useQueryClient();
@@ -33,21 +34,21 @@ export function useReservas(idConfirmReserva?: string) {
   const [isError, setIsError] = useState(false);
   const { usuario } = useAuth();
 
-  const collections: CollectionConfig[] = [
-    {
-      name: "reservasUsuario",
-      query: (userId) =>
-        query(collection(db, "reservas"), where("usuarioId", "==", userId)),
-      transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
-    },
-    {
-      name: "todasLasReservas",
-      query: () => query(collection(db, "reservas")),
-      transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
-    },
-  ];
+  // const collections: CollectionConfig[] = [
+  //   {
+  //     name: "reservasUsuario",
+  //     query: (userId) =>
+  //       query(collection(db, "reservas"), where("usuarioId", "==", userId)),
+  //     transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
+  //   },
+  //   {
+  //     name: "todasLasReservas",
+  //     query: () => query(collection(db, "reservas")),
+  //     transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
+  //   },
+  // ];
 
-  const { data } = useRealtimeQueries(collections);
+  // const { data } = useRealtimeQueries(collections);
 
   useEffect(() => {
     if (!usuario) {
@@ -57,8 +58,12 @@ export function useReservas(idConfirmReserva?: string) {
     }
 
     setIsLoading(true);
-    const reservasCol = collection(db, "reservas");
-    const q = query(reservasCol, where("usuarioId", "==", usuario.uid));
+    const reservasCollection = collection(db, "reservas");
+    const q = query(
+      reservasCollection,
+      where("usuarioId", "==", usuario.uid),
+      orderBy("dia", "desc")
+    );
 
     const unsubscribe = onSnapshot(
       q,
@@ -81,7 +86,8 @@ export function useReservas(idConfirmReserva?: string) {
 
   const obtenerTodasLasReservas = async (): Promise<IReserva[]> => {
     const reservasCol = collection(db, "reservas");
-    const reservasSnapshot = await getDocs(reservasCol);
+    const q = query(reservasCol, orderBy("dia", "desc"));
+    const reservasSnapshot = await getDocs(q);
     return reservasSnapshot.docs.map(
       (doc) => ({ id: doc.id, ...doc.data() } as IReserva)
     );
@@ -209,7 +215,7 @@ export function useReservas(idConfirmReserva?: string) {
 
   return {
     reservas,
-    data,
+    // data,
     isLoading,
     isError,
     agregarReserva: agregarReservaMutation.mutate,
@@ -220,5 +226,6 @@ export function useReservas(idConfirmReserva?: string) {
     confirmarReserva,
     cancelarReserva,
     actualizarEstadoReserva: actualizarEstadoReservaMutation.mutate,
+    actualizarReserva: actualizarEstadoReservaMutation,
   };
 }

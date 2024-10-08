@@ -40,8 +40,8 @@ const CreateNewUser: React.FC = () => {
   return (
     <div className="flex flex-col gap-4 p-4">
       <ToastContainer />
-      <div className="flex w-full justify-center">
-        <form className="flex flex-col gap-4 w-full lg:w-1/2 shadow-custom p-8 rounded-lg">
+      <div className="flex w-full justify-center ">
+        <form className="flex flex-col gap-4 w-full lg:w-1/2 shadow-custom p-8 rounded-lg bg-white">
           <h1 className="text-2xl font-bold text-center mb-4 uppercase">
             Crear Nuevo Usuario
           </h1>
