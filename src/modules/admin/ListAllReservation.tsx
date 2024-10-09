@@ -1,25 +1,17 @@
 import { Modal, Tag } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import { IReserva } from "../../interfaces/IReservas";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
 const ListAllReservation = () => {
   const [id, setId] = useState("");
-  const [reservas, setReservas] = useState<IReserva[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const { isLoading, isError, todasLasReservas, confirmarReserva } =
-    useReservas();
-
-  useEffect(() => {
-    if (todasLasReservas) {
-      setReservas(todasLasReservas);
-    }
-  }, [todasLasReservas]);
+  const { isLoading, isError, reservas, confirmarReserva } = useReservas();
 
   if (isLoading) return <div>Cargando...</div>;
   if (isError) return <div>Error al cargar las reservas</div>;

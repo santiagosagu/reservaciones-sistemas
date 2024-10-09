@@ -66,8 +66,7 @@ const NewReservation = () => {
         await agregarReserva(dataReservation);
         toast.success("¡Se ha generado la reserva!");
         setDataReservation({
-          nombre: "",
-          materia: "",
+          ...dataReservation,
           dia: null,
           horaInicio: null,
           horaFin: null,

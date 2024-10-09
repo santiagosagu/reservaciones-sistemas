@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -11,20 +12,11 @@ import {
   updateDoc,
   onSnapshot,
   orderBy,
-  // DocumentData,
-  // Query,
 } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig";
 import { IReserva } from "../interfaces/IReservas";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
-// import useRealtimeQueries from "./useRealTimeQueries";
-
-// interface CollectionConfig {
-//   name: string;
-//   query: (userId: string | null) => Query<DocumentData>;
-//   transform: (doc: DocumentData) => any;
-// }
 
 export function useReservas(idConfirmReserva?: string) {
   const queryClient = useQueryClient();
@@ -32,23 +24,10 @@ export function useReservas(idConfirmReserva?: string) {
   const [reservas, setReservas] = useState<IReserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
+  const audioRef = useRef(new Audio("/sound/notificacion.mp3"));
+  const prevReservasRef = useRef<IReserva[]>([]);
+
   const { usuario } = useAuth();
-
-  // const collections: CollectionConfig[] = [
-  //   {
-  //     name: "reservasUsuario",
-  //     query: (userId) =>
-  //       query(collection(db, "reservas"), where("usuarioId", "==", userId)),
-  //     transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
-  //   },
-  //   {
-  //     name: "todasLasReservas",
-  //     query: () => query(collection(db, "reservas")),
-  //     transform: (doc) => ({ id: doc.id, ...doc.data() } as IReserva),
-  //   },
-  // ];
-
-  // const { data } = useRealtimeQueries(collections);
 
   useEffect(() => {
     if (!usuario) {
@@ -59,11 +38,17 @@ export function useReservas(idConfirmReserva?: string) {
 
     setIsLoading(true);
     const reservasCollection = collection(db, "reservas");
-    const q = query(
-      reservasCollection,
-      where("usuarioId", "==", usuario.uid),
-      orderBy("dia", "desc")
-    );
+    let q;
+
+    if (usuario.rol === "admin") {
+      q = query(reservasCollection, orderBy("dia", "desc"));
+    } else {
+      q = query(
+        reservasCollection,
+        where("usuarioId", "==", usuario.uid),
+        orderBy("dia", "desc")
+      );
+    }
 
     const unsubscribe = onSnapshot(
       q,
@@ -73,6 +58,46 @@ export function useReservas(idConfirmReserva?: string) {
         );
         setReservas(nuevasReservas);
         setIsLoading(false);
+
+        if (usuario.rol === "admin" && reservas.length > 0) {
+          const nuevasCreaciones = nuevasReservas.filter(
+            (reserva) =>
+              !reservas.some((prevReserva) => prevReserva.id === reserva.id)
+          );
+
+          if (nuevasCreaciones.length > 0 && audioRef.current) {
+            console.log("Nuevas reservas creadas:", nuevasCreaciones);
+            audioRef.current
+              .play()
+              .catch((error) =>
+                console.error("Error al reproducir sonido:", error)
+              );
+            console.log("Nuevas reservas creadas:", nuevasCreaciones);
+          }
+        } else if (usuario.rol !== "admin" && reservas.length > 0) {
+          const nuevasConfirmaciones = nuevasReservas.filter(
+            (reserva) =>
+              reserva.estado === "confirmada" &&
+              prevReservasRef.current.find(
+                (prevReserva) =>
+                  prevReserva.id === reserva.id &&
+                  prevReserva.estado !== "confirmada"
+              )
+          );
+
+          if (nuevasConfirmaciones.length > 0 && audioRef.current) {
+            console.log("Nuevas reservas confirmadas:", nuevasConfirmaciones);
+            audioRef.current
+              .play()
+              .catch((error) =>
+                console.error("Error al reproducir sonido:", error)
+              );
+
+            console.log("Reservas confirmadas:", nuevasConfirmaciones);
+          }
+        }
+
+        prevReservasRef.current = nuevasReservas;
       },
       (error) => {
         console.error("Error al obtener reservas:", error);
@@ -83,15 +108,6 @@ export function useReservas(idConfirmReserva?: string) {
 
     return () => unsubscribe();
   }, [usuario]);
-
-  const obtenerTodasLasReservas = async (): Promise<IReserva[]> => {
-    const reservasCol = collection(db, "reservas");
-    const q = query(reservasCol, orderBy("dia", "desc"));
-    const reservasSnapshot = await getDocs(q);
-    return reservasSnapshot.docs.map(
-      (doc) => ({ id: doc.id, ...doc.data() } as IReserva)
-    );
-  };
 
   const obtenerReservasPorID = async (id: string): Promise<IReserva[]> => {
     const reservasCol = collection(db, "reservas", id);
@@ -170,11 +186,6 @@ export function useReservas(idConfirmReserva?: string) {
     await actualizarEstadoReserva(reservaId, "cancelada");
   };
 
-  const todasLasReservasQuery = useQuery<IReserva[], Error>({
-    queryKey: ["todasLasReservas"],
-    queryFn: obtenerTodasLasReservas,
-  });
-
   const reservasPorIDQuery = useQuery<IReserva[], Error>({
     queryKey: ["reservasPorID"],
     queryFn: () => obtenerReservasPorID(idConfirmReserva || ""),
@@ -220,7 +231,6 @@ export function useReservas(idConfirmReserva?: string) {
     isError,
     agregarReserva: agregarReservaMutation.mutate,
     eliminarReserva: eliminarReservaMutation.mutate,
-    todasLasReservas: todasLasReservasQuery.data,
     comprobarDisponibilidad,
     reservasPorID: reservasPorIDQuery.data,
     confirmarReserva,
