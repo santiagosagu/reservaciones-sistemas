@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -50,6 +49,24 @@ export function useReservas(idConfirmReserva?: string) {
       );
     }
 
+    const solicitarPermisoNotificaciones = async () => {
+      if (Notification.permission !== "granted") {
+        const permiso = await Notification.requestPermission();
+        return permiso === "granted";
+      }
+      return true;
+    };
+
+    const mostrarNotificacion = async (titulo: string, cuerpo: string) => {
+      audioRef.current
+        .play()
+        .catch((error) => console.error("Error al reproducir sonido:", error));
+      const tienePermiso = await solicitarPermisoNotificaciones();
+      if (tienePermiso) {
+        new Notification(titulo, { body: cuerpo });
+      }
+    };
+
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
@@ -59,22 +76,21 @@ export function useReservas(idConfirmReserva?: string) {
         setReservas(nuevasReservas);
         setIsLoading(false);
 
-        if (usuario.rol === "admin" && reservas.length > 0) {
+        if (usuario.rol === "admin") {
           const nuevasCreaciones = nuevasReservas.filter(
             (reserva) =>
-              !reservas.some((prevReserva) => prevReserva.id === reserva.id)
+              !prevReservasRef.current.some(
+                (prevReserva) => prevReserva.id === reserva.id
+              )
           );
 
           if (nuevasCreaciones.length > 0 && audioRef.current) {
-            console.log("Nuevas reservas creadas:", nuevasCreaciones);
-            audioRef.current
-              .play()
-              .catch((error) =>
-                console.error("Error al reproducir sonido:", error)
-              );
-            console.log("Nuevas reservas creadas:", nuevasCreaciones);
+            mostrarNotificacion(
+              "Nueva reserva",
+              `Se ha creado ${nuevasCreaciones.length} nueva(s) reserva(s)`
+            );
           }
-        } else if (usuario.rol !== "admin" && reservas.length > 0) {
+        } else {
           const nuevasConfirmaciones = nuevasReservas.filter(
             (reserva) =>
               reserva.estado === "confirmada" &&
@@ -86,14 +102,10 @@ export function useReservas(idConfirmReserva?: string) {
           );
 
           if (nuevasConfirmaciones.length > 0 && audioRef.current) {
-            console.log("Nuevas reservas confirmadas:", nuevasConfirmaciones);
-            audioRef.current
-              .play()
-              .catch((error) =>
-                console.error("Error al reproducir sonido:", error)
-              );
-
-            console.log("Reservas confirmadas:", nuevasConfirmaciones);
+            mostrarNotificacion(
+              "Reserva confirmada",
+              `Se ha confirmado ${nuevasConfirmaciones.length} reserva(s)`
+            );
           }
         }
 
