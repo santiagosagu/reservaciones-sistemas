@@ -16,6 +16,7 @@ import { auth, db } from "../firebase/firebaseConfig";
 import { IReserva } from "../interfaces/IReservas";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "./useAuth";
+import publicarNotificacion from "../api/usePublicarNotificacion";
 
 export function useReservas(idConfirmReserva?: string) {
   const queryClient = useQueryClient();
@@ -89,6 +90,14 @@ export function useReservas(idConfirmReserva?: string) {
               "Nueva reserva",
               `Se ha creado ${nuevasCreaciones.length} nueva(s) reserva(s)`
             );
+
+            publicarNotificacion()
+              .then((resultado) => {
+                console.log("Notificación publicada con éxito:", resultado);
+              })
+              .catch((error) => {
+                console.error("Error al publicar notificación:", error);
+              });
           }
         } else {
           const nuevasConfirmaciones = nuevasReservas.filter(
