@@ -4,6 +4,7 @@ import CheckoutReservation from "./CheckoutReservation";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import AllReservationWhitConfirm from "./AllReservationWhitConfirm";
 
 const UserReservation = () => {
   const { usuario, cerrarSesion, cargando } = useAuth();
@@ -25,11 +26,11 @@ const UserReservation = () => {
       label: "Mis Reservas",
       children: <CheckoutReservation />,
     },
-    // {
-    //   key: '3',
-    //   label: 'Cancelled',
-    //   children: <TableOrders />,
-    // },
+    {
+      key: "3",
+      label: "todas las reservas",
+      children: <AllReservationWhitConfirm />,
+    },
   ];
 
   return (
@@ -39,14 +40,20 @@ const UserReservation = () => {
           Cerrar Sesión
         </Button>
       </div>
-      <h1 className="text-2xl font-bold text-center my-4 uppercase">
+      <h1 className="text-2xl font-bold text-center my-4 uppercase text-[#EEEEEE]">
         Sistema De Reservas
       </h1>
       <div className="flex justify-center mb-3">
         <img src="/images/colombofrances_logo.jpeg" alt="" className="w-60" />
       </div>
       <div>
-        <Tabs defaultActiveKey="1" type="card" size="large" items={items} />
+        <Tabs
+          defaultActiveKey="1"
+          type="card"
+          size="large"
+          items={items}
+          className="text-white"
+        />
       </div>
     </div>
   );

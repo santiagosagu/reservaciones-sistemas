@@ -2,7 +2,7 @@ import { Modal, Tag } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import { IReserva } from "../../interfaces/IReservas";
 import { useState } from "react";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
 
 const ListAllReservation = () => {
@@ -38,7 +38,6 @@ const ListAllReservation = () => {
 
   return (
     <div className="flex justify-center gap-2 p-4 w-full">
-      <ToastContainer />
       <div className="w-full lg:w-[800px]">
         {reservas?.map((reserva: IReserva) => (
           <div

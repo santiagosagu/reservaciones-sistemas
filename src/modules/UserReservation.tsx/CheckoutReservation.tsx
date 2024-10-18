@@ -1,10 +1,39 @@
-import { Tag } from "antd";
+import { Modal, Tag } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import { IReserva } from "../../interfaces/IReservas";
+import CancelPresentationIcon from "@mui/icons-material/CancelPresentation";
+import { useState } from "react";
+import { toast } from "react-toastify";
+import { useQueryClient } from "@tanstack/react-query";
 // import GenerateQR from "../../components/GenerateQR";
 
 const CheckoutReservation = () => {
-  const { isLoading, isError, reservas } = useReservas();
+  const [id, setId] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const queryClient = useQueryClient();
+
+  const { isLoading, isError, reservas, eliminarReserva } = useReservas();
+
+  const handleClick = (id: string, estado: string) => {
+    if (estado === "pendiente") {
+      setId(id);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleOk = () => {
+    eliminarReserva(id);
+    setIsModalOpen(false);
+    setId("");
+    toast.success("Reserva eliminada con éxito");
+    queryClient.invalidateQueries({ queryKey: ["todasLasReservas"] });
+  };
+
+  const handleCancel = () => {
+    setIsModalOpen(false);
+    setId("");
+  };
 
   if (isLoading) return <div>Cargando...</div>;
   if (isError) return <div>Error al cargar las reservas</div>;
@@ -17,6 +46,14 @@ const CheckoutReservation = () => {
             className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl bg-white"
             key={reserva.id}
           >
+            {reserva.estado === "pendiente" && (
+              <div className="flex justify-end">
+                <CancelPresentationIcon
+                  className="cursor-pointer"
+                  onClick={() => handleClick(reserva.id, reserva?.estado || "")}
+                />
+              </div>
+            )}
             <Tag
               bordered={false}
               color={
@@ -56,7 +93,14 @@ const CheckoutReservation = () => {
           </div>
         ))}
       </div>
-      <div></div>
+      <Modal
+        title="Confirmar Reserva?"
+        open={isModalOpen}
+        onOk={handleOk}
+        onCancel={handleCancel}
+      >
+        <h2>Estas seguro de eliminar esta reserva?</h2>
+      </Modal>
     </div>
   );
 };

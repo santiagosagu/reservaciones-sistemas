@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button, Input } from "antd";
 import { useAuth } from "../../hooks/useAuth";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const CreateNewUser: React.FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -39,7 +39,6 @@ const CreateNewUser: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <ToastContainer />
       <div className="flex w-full justify-center ">
         <form className="flex flex-col gap-4 w-full lg:w-1/2 shadow-custom p-8 rounded-lg bg-white">
           <h1 className="text-2xl font-bold text-center mb-4 uppercase">

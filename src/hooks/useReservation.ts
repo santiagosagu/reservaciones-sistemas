@@ -129,6 +129,19 @@ export function useReservas(idConfirmReserva?: string) {
     );
   };
 
+  const obtenerReservasPorEstado = async (): Promise<IReserva[]> => {
+    const reservasCol = collection(db, "reservas");
+    const q = query(
+      reservasCol,
+      where("estado", "==", "confirmada"),
+      orderBy("dia", "desc")
+    );
+    const reservasSnapshot = await getDocs(q);
+    return reservasSnapshot.docs.map(
+      (doc) => ({ id: doc.id, ...doc.data() } as IReserva)
+    );
+  };
+
   const comprobarDisponibilidad = async (
     nuevaReserva: Omit<IReserva, "id" | "usuarioId">
   ): Promise<boolean> => {
@@ -203,6 +216,11 @@ export function useReservas(idConfirmReserva?: string) {
     queryFn: () => obtenerReservasPorID(idConfirmReserva || ""),
   });
 
+  const reservasPorEstadoQuery = useQuery<IReserva[], Error>({
+    queryKey: ["reservasPorEstado"],
+    queryFn: () => obtenerReservasPorEstado(),
+  });
+
   const agregarReservaMutation = useMutation({
     mutationFn: agregarReserva,
     onSuccess: () => {
@@ -241,13 +259,14 @@ export function useReservas(idConfirmReserva?: string) {
     // data,
     isLoading,
     isError,
+    reservasPorID: reservasPorIDQuery.data,
+    reservasPorEstado: reservasPorEstadoQuery.data,
     agregarReserva: agregarReservaMutation.mutate,
     eliminarReserva: eliminarReservaMutation.mutate,
-    comprobarDisponibilidad,
-    reservasPorID: reservasPorIDQuery.data,
-    confirmarReserva,
-    cancelarReserva,
     actualizarEstadoReserva: actualizarEstadoReservaMutation.mutate,
     actualizarReserva: actualizarEstadoReservaMutation,
+    comprobarDisponibilidad,
+    confirmarReserva,
+    cancelarReserva,
   };
 }

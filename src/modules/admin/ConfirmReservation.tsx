@@ -2,7 +2,7 @@ import { useState } from "react";
 import QRScanner from "../../components/QRScanner";
 import { Modal } from "antd";
 import { useReservas } from "../../hooks/useReservation";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 
 const ConfirmReservation = () => {
   const [result, setResult] = useState("");
@@ -29,7 +29,6 @@ const ConfirmReservation = () => {
 
   return (
     <div>
-      <ToastContainer />
       <h2>Confirmar Reservas</h2>
       <QRScanner onScan={handleScan} />
       {reservasPorID && reservasPorID.length > 0 && (

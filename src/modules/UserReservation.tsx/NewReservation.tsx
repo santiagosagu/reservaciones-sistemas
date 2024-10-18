@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button, DatePicker, Input, TimePicker } from "antd";
 import { useReservas } from "../../hooks/useReservation";
 import dayjs from "dayjs";
-import { toast, ToastContainer } from "react-toastify";
+import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { IReserva } from "../../interfaces/IReservas";
 import { useAuth } from "../../hooks/useAuth";
@@ -85,7 +85,6 @@ const NewReservation = () => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <ToastContainer />
       <div className="flex w-full justify-center">
         <div className="flex flex-col gap-4 w-full lg:w-1/2 shadow-custom p-8 rounded-lg bg-white">
           <h1 className="text-2xl font-bold text-center pb-4">Nueva Reserva</h1>
