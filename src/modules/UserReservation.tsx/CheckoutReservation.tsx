@@ -49,6 +49,7 @@ const CheckoutReservation = () => {
             {reserva.estado === "pendiente" && (
               <div className="flex justify-end">
                 <CancelPresentationIcon
+                  color="action"
                   className="cursor-pointer"
                   onClick={() => handleClick(reserva.id, reserva?.estado || "")}
                 />
