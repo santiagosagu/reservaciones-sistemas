@@ -4,19 +4,29 @@ import { IReserva } from "../../interfaces/IReservas";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { useQueryClient } from "@tanstack/react-query";
+import CancelPresentationIcon from "@mui/icons-material/CancelPresentation";
 
 const ListAllReservation = () => {
   const [id, setId] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetele, setIsDelete] = useState(false);
 
   const queryClient = useQueryClient();
 
-  const { isLoading, isError, reservas, confirmarReserva } = useReservas();
+  const { isLoading, isError, reservas, confirmarReserva, eliminarReserva } =
+    useReservas();
 
   if (isLoading) return <div>Cargando...</div>;
   if (isError) return <div>Error al cargar las reservas</div>;
 
+  const handleDeleteReservation = (idDelete: string) => {
+    setIsDelete(true);
+    setId(idDelete);
+    setIsModalOpen(true);
+  };
+
   const handleClick = (id: string, estado: string) => {
+    setIsDelete(false);
     if (estado === "pendiente") {
       setId(id);
       setIsModalOpen(true);
@@ -24,10 +34,17 @@ const ListAllReservation = () => {
   };
 
   const handleOk = () => {
-    confirmarReserva(id);
-    setIsModalOpen(false);
-    setId("");
-    toast.success("Reserva confirmada con éxito");
+    if (!isDetele) {
+      confirmarReserva(id);
+      setIsModalOpen(false);
+      setId("");
+      toast.success("Reserva confirmada con éxito");
+    } else {
+      eliminarReserva(id);
+      setIsModalOpen(false);
+      setId("");
+      toast.success("Se elimino con éxito");
+    }
     queryClient.invalidateQueries({ queryKey: ["todasLasReservas"] });
   };
 
@@ -44,6 +61,13 @@ const ListAllReservation = () => {
             className="flex flex-col gap-2 p-4 shadow-custom mb-5 rounded-lg max-w-xl bg-white"
             key={reserva.id}
           >
+            <div className="flex justify-end">
+              <CancelPresentationIcon
+                color="action"
+                className="cursor-pointer"
+                onClick={() => handleDeleteReservation(reserva.id)}
+              />
+            </div>
             <Tag
               className="cursor-pointer"
               bordered={false}
@@ -86,7 +110,11 @@ const ListAllReservation = () => {
         onOk={handleOk}
         onCancel={handleCancel}
       >
-        <h2>Estas seguro de confirmar esta reserva?</h2>
+        <h2>
+          {!isDetele
+            ? "Estas seguro de confirmar esta reserva?"
+            : "Estas seguro de eliminar esta reserva?"}{" "}
+        </h2>
       </Modal>
     </div>
   );
